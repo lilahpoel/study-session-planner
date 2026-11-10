@@ -9,12 +9,13 @@
 :root {
   --bg: #f6f5fb;
   --surface: #ffffff;
-  --text: #24233b;
+  --text: #28263d;
   --muted: #85849b;
   --purple: #7664d8;
   --purple-light: #eeeaff;
   --border: #eceaf3;
-  --green: #3caa83;
+  --green: #36a981;
+  --red: #d96666;
   --shadow: 0 5px 25px rgba(40,30,80,.05);
 }
 
@@ -175,7 +176,7 @@ header {
   border-radius: 10px;
   padding: 12px;
   outline: none;
-  background: #fff;
+  background: white;
   color: var(--text);
 }
 
@@ -260,10 +261,10 @@ header {
   border: none;
   color: #aaa;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 19px;
 }
 
-.delete-btn:hover { color: #dc6262; }
+.delete-btn:hover { color: var(--red); }
 
 .schedule-heading {
   display: flex;
@@ -279,13 +280,14 @@ header {
   border: 1px solid var(--border);
   border-radius: 13px;
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 13px;
 }
 
 .day-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 12px;
 }
 
@@ -297,22 +299,46 @@ header {
 .day-total {
   font-size: 11px;
   color: var(--muted);
+  text-align: right;
+}
+
+.day-progress-label {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 5px;
 }
 
 .session {
   background: #f8f7fc;
   border-radius: 9px;
-  padding: 11px 12px;
-  margin-top: 8px;
+  padding: 12px;
+  margin-top: 9px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
 
+.session-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.session input[type=checkbox] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .session-name {
   font-size: 12px;
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .session-subject {
@@ -328,6 +354,20 @@ header {
   white-space: nowrap;
 }
 
+.session-status {
+  font-size: 10px;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.completed-session {
+  opacity: .72;
+}
+
+.completed-session .session-name {
+  text-decoration: line-through;
+}
+
 .empty {
   text-align: center;
   padding: 30px 12px;
@@ -336,23 +376,34 @@ header {
   line-height: 1.7;
 }
 
-.empty-icon { font-size: 30px; margin-bottom: 8px; }
+.empty-icon {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.overdue {
+  color: var(--red);
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 5px;
+}
 
 .footer-note {
   text-align: center;
   font-size: 11px;
   color: var(--muted);
   margin-top: 25px;
+  line-height: 1.8;
 }
 
-@media(max-width: 780px) {
+@media(max-width:780px) {
   .layout { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
   .app { padding: 20px 14px; }
   .welcome h2 { font-size: 24px; }
 }
 
-@media(max-width: 430px) {
+@media(max-width:430px) {
   .stats { grid-template-columns: 1fr; }
   .today-label { display: none; }
 }
@@ -376,43 +427,41 @@ header {
 <section class="welcome">
   <h2>Let's get things done! ✨</h2>
   <p>Your personal study planner. Stay organized, meet deadlines,
-     and make progress every day.</p>
+    and make progress every day.</p>
 </section>
 
 <section class="stats">
   <div class="stat">
-    <div class="stat-label">Total Tasks</div>
+    <div class="stat-label">Total Assignments</div>
     <div class="stat-number" id="totalTasks">0</div>
-    <small>Tasks in your planner</small>
+    <small>Assignments in your planner</small>
   </div>
 
   <div class="stat">
-    <div class="stat-label">Completed</div>
+    <div class="stat-label">Completed Assignments</div>
     <div class="stat-number" id="completedTasks">0</div>
-    <small>Tasks you've finished</small>
+    <small>Entire assignments finished</small>
   </div>
 
   <div class="stat">
-    <div class="stat-label">Overall Progress</div>
+    <div class="stat-label">Overall Study Progress</div>
     <div class="stat-number" id="progressText">0%</div>
     <div class="progress-track">
       <div class="progress-fill" id="progressBar"
-           style="width:0%"></div>
+        style="width:0%"></div>
     </div>
   </div>
 </section>
 
 <main class="layout">
 
-<!-- LEFT COLUMN -->
 <div>
-
   <section class="panel">
-    <h3>＋ Add a New Task</h3>
+    <h3>＋ Add a New Assignment</h3>
 
     <form id="taskForm">
       <div class="field">
-        <label for="taskName">Task Name</label>
+        <label for="taskName">Assignment Name</label>
         <input id="taskName" type="text"
           placeholder="e.g. Study Chapter 5" required>
       </div>
@@ -444,64 +493,53 @@ header {
       </div>
 
       <button class="primary-btn" type="submit">
-        + Add Task to Planner
+        + Add Assignment to Planner
       </button>
     </form>
   </section>
 
   <section class="panel">
-    <h3>Your Tasks</h3>
-    <div id="taskList">
-      <div class="empty">
-        <div class="empty-icon">📚</div>
-        Your tasks will appear here.
-      </div>
-    </div>
+    <h3>Your Assignments</h3>
+    <div id="taskList"></div>
   </section>
-
 </div>
 
-<!-- RIGHT COLUMN -->
 <div>
-
   <section class="panel">
     <div class="schedule-heading">
-      <h3>📅 Your Study Schedule</h3>
+      <h3>📅 Your Daily Study Plan</h3>
       <button class="secondary-btn" id="generateBtn">
-        ↻ Regenerate
+        ↻ Refresh
       </button>
     </div>
 
     <p style="font-size:12px;color:#85849b;margin-top:-8px;
-      margin-bottom:18px;">
-      Your remaining study time is automatically divided
-      across the days leading up to each deadline.
+      margin-bottom:18px;line-height:1.6;">
+      Check off each session as you finish it. Missed study
+      time is automatically redistributed across your
+      remaining days.
     </p>
 
-    <div id="schedule">
-      <div class="empty">
-        <div class="empty-icon">🗓️</div>
-        Add a task to generate your personalized study schedule.
-      </div>
-    </div>
+    <div id="schedule"></div>
   </section>
 
   <section class="panel">
-    <h3>💡 Study Tips</h3>
+    <h3>💡 Your Study Reminders</h3>
     <div style="font-size:12px;color:#77768c;line-height:2;">
-      <div>✦ Break larger assignments into smaller sessions.</div>
+      <div>✦ Break large assignments into smaller sessions.</div>
       <div>✦ Start studying before deadlines get too close.</div>
-      <div>✦ Take short breaks between study sessions.</div>
-      <div>✦ Check off tasks as soon as you finish them!</div>
+      <div>✦ Take breaks between study sessions.</div>
+      <div>✦ Check off each session when you're finished.</div>
+      <div>✦ Your plan adjusts when you fall behind!</div>
     </div>
   </section>
-
 </div>
+
 </main>
 
 <div class="footer-note">
   StudySpace • Your goals, one session at a time ♡
-  <br>Changes are automatically saved in this browser.
+  <br>Your assignments and progress are automatically saved.
 </div>
 
 </div>
@@ -511,19 +549,32 @@ const STORAGE_KEY = "studyspace_tasks_v1";
 
 let tasks = loadTasks();
 
+// Load previously saved assignments
 function loadTasks() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
+    if (!Array.isArray(saved)) return [];
+
+    return saved.map(task => ({
+      ...task,
+      dailyDone: task.dailyDone || {},
+      completed: Boolean(task.completed)
+    }));
   } catch {
     return [];
   }
 }
 
+// Save assignments and completed sessions
 function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  } catch (error) {
+    alert("Your browser could not save your changes. Check your storage settings.");
+  }
 }
 
+// Local date helpers
 function localDate(date = new Date()) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -550,6 +601,15 @@ function formatDate(value) {
   });
 }
 
+function formatDuration(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours && mins) return `${hours}h ${mins}m`;
+  if (hours) return `${hours}h`;
+  return `${mins}m`;
+}
+
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
@@ -560,7 +620,7 @@ function escapeHTML(value) {
   })[char]);
 }
 
-// Display today's date
+// Set today's date
 document.getElementById("today").textContent =
   new Date().toLocaleDateString("en-US", {
     month: "short",
@@ -568,9 +628,9 @@ document.getElementById("today").textContent =
     year: "numeric"
   });
 
-// Set minimum deadline to today
 document.getElementById("dueDate").min = localDate();
 
+// Add a new assignment
 document.getElementById("taskForm").addEventListener("submit", e => {
   e.preventDefault();
 
@@ -579,13 +639,14 @@ document.getElementById("taskForm").addEventListener("submit", e => {
   const hours = Number(document.getElementById("hours").value);
   const dueDate = document.getElementById("dueDate").value;
 
-  if (!name || !subject || !hours || hours <= 0 || !dueDate) {
-    alert("Please fill out all task details.");
+  if (!name || !subject || !hours || !dueDate ||
+      !Number.isFinite(hours) || hours <= 0 || hours > 100) {
+    alert("Please enter valid information for every field.");
     return;
   }
 
-  if (!Number.isFinite(hours) || hours > 100) {
-    alert("Please enter a valid study time.");
+  if (dueDate < localDate()) {
+    alert("Please select today or a future due date.");
     return;
   }
 
@@ -597,7 +658,8 @@ document.getElementById("taskForm").addEventListener("submit", e => {
     subject,
     minutes: Math.round(hours * 60),
     dueDate,
-    completed: false
+    completed: false,
+    dailyDone: {}
   });
 
   saveTasks();
@@ -605,27 +667,59 @@ document.getElementById("taskForm").addEventListener("submit", e => {
   render();
 });
 
-// Mark tasks complete or incomplete
+// Mark an entire assignment complete
 function toggleTask(id) {
   tasks = tasks.map(task =>
     task.id === id
       ? {...task, completed: !task.completed}
       : task
   );
+
   saveTasks();
   render();
 }
 
-// Delete tasks
+// Delete an assignment
 function deleteTask(id) {
-  if (!confirm("Are you sure you want to delete this task?")) return;
+  if (!confirm("Are you sure you want to delete this assignment?")) {
+    return;
+  }
 
   tasks = tasks.filter(task => task.id !== id);
   saveTasks();
   render();
 }
 
-// Render task list
+// Check off an individual study session
+function toggleSession(id, date, minutes, checked) {
+  const task = tasks.find(t => t.id === id);
+
+  if (!task || task.completed) return;
+
+  if (!task.dailyDone) task.dailyDone = {};
+
+  if (checked) {
+    task.dailyDone[date] = minutes;
+  } else {
+    delete task.dailyDone[date];
+  }
+
+  saveTasks();
+  render();
+}
+
+// Calculate the amount of time already completed
+function getCompletedMinutes(task) {
+  if (task.completed) return task.minutes;
+
+  return Math.min(
+    task.minutes,
+    Object.values(task.dailyDone || {})
+      .reduce((sum, value) => sum + Number(value), 0)
+  );
+}
+
+// Render the assignment list
 function renderTasks() {
   const list = document.getElementById("taskList");
 
@@ -633,7 +727,7 @@ function renderTasks() {
     list.innerHTML = `
       <div class="empty">
         <div class="empty-icon">📚</div>
-        No tasks yet. Add your first task above!
+        Your assignments will appear here.
       </div>`;
     return;
   }
@@ -641,92 +735,150 @@ function renderTasks() {
   list.innerHTML = tasks
     .slice()
     .sort((a,b) => a.dueDate.localeCompare(b.dueDate))
-    .map(task => `
-      <div class="task ${task.completed ? "completed" : ""}">
-        <input type="checkbox"
-          aria-label="Mark ${escapeHTML(task.name)} complete"
-          ${task.completed ? "checked" : ""}
-          onchange="toggleTask('${task.id}')">
+    .map(task => {
+      const progress = Math.round(
+        getCompletedMinutes(task) / task.minutes * 100
+      );
 
-        <div class="task-info">
-          <div class="task-name">${escapeHTML(task.name)}</div>
-          <div class="task-meta">
-            ${task.minutes / 60} hours · Due ${formatDate(task.dueDate)}
+      return `
+        <div class="task ${task.completed ? "completed" : ""}">
+          <input type="checkbox"
+            aria-label="Mark assignment complete"
+            ${task.completed ? "checked" : ""}
+            onchange="toggleTask('${task.id}')">
+
+          <div class="task-info">
+            <div class="task-name">${escapeHTML(task.name)}</div>
+
+            <div class="task-meta">
+              ${task.minutes / 60} hours · Due ${formatDate(task.dueDate)}
+            </div>
+
+            <span class="subject-tag">
+              ${escapeHTML(task.subject)}
+            </span>
+
+            <div class="progress-track">
+              <div class="progress-fill"
+                style="width:${progress}%"></div>
+            </div>
+
+            <div class="task-meta">
+              ${progress}% of study time completed
+            </div>
           </div>
-          <span class="subject-tag">
-            ${escapeHTML(task.subject)}
-          </span>
-        </div>
 
-        <button class="delete-btn"
-          aria-label="Delete task"
-          onclick="deleteTask('${task.id}')">×</button>
-      </div>
-    `).join("");
+          <button class="delete-btn"
+            aria-label="Delete assignment"
+            onclick="deleteTask('${task.id}')">×</button>
+        </div>
+      `;
+    }).join("");
 }
 
-// Update dashboard progress
+// Update overall progress
 function renderStats() {
   const total = tasks.length;
   const completed = tasks.filter(t => t.completed).length;
-  const percentage = total
-    ? Math.round(completed / total * 100)
+
+  const totalMinutes = tasks.reduce(
+    (sum, task) => sum + task.minutes, 0
+  );
+
+  const completedMinutes = tasks.reduce(
+    (sum, task) => sum + getCompletedMinutes(task), 0
+  );
+
+  const percentage = totalMinutes
+    ? Math.round(completedMinutes / totalMinutes * 100)
     : 0;
 
   document.getElementById("totalTasks").textContent = total;
   document.getElementById("completedTasks").textContent = completed;
   document.getElementById("progressText").textContent =
     percentage + "%";
+
   document.getElementById("progressBar").style.width =
     percentage + "%";
 }
 
-// Automatically distribute incomplete task time across
-// all available days, including the deadline.
+// Generate an adaptive study schedule
 function generateSchedule() {
   const today = localDate();
   const schedule = {};
 
   const remainingTasks = tasks
-    .filter(t => !t.completed)
+    .filter(task => !task.completed)
     .slice()
-    .sort((a,b) =>
-      a.dueDate.localeCompare(b.dueDate)
-    );
+    .sort((a,b) => a.dueDate.localeCompare(b.dueDate));
 
   remainingTasks.forEach(task => {
-    // Overdue tasks are scheduled for today.
+    if (!task.dailyDone) task.dailyDone = {};
+
+    // Keep the original deadline.
+    // Overdue work moves to today rather than disappearing.
     const deadline = task.dueDate < today
       ? today
       : task.dueDate;
 
-    const start = today;
-    const end = deadline;
+    const completedMinutes = getCompletedMinutes(task);
+    const remainingMinutes = Math.max(
+      0, task.minutes - completedMinutes
+    );
 
     const dayCount = Math.max(
       1,
       Math.round(
-        (parseDate(end) - parseDate(start)) / 86400000
+        (parseDate(deadline) - parseDate(today)) / 86400000
       ) + 1
     );
 
-    // Spread minutes as evenly as possible across days.
-    const base = Math.floor(task.minutes / dayCount);
-    const extra = task.minutes % dayCount;
+    const availableDates = [];
 
     for (let i = 0; i < dayCount; i++) {
       const date = addDays(today, i);
-      const minutes = base + (i < extra ? 1 : 0);
 
-      if (!minutes) continue;
+      // Preserve completed sessions.
+      if (task.dailyDone[date] !== undefined) {
+        if (!schedule[date]) schedule[date] = [];
 
-      if (!schedule[date]) schedule[date] = [];
+        schedule[date].push({
+          id: task.id,
+          name: task.name,
+          subject: task.subject,
+          minutes: Number(task.dailyDone[date]),
+          dueDate: task.dueDate,
+          completed: true
+        });
+      } else {
+        availableDates.push(date);
+      }
+    }
 
-      schedule[date].push({
-        name: task.name,
-        subject: task.subject,
-        minutes,
-        dueDate: task.dueDate
+    // Divide remaining study time evenly across
+    // days that do not already have a completed session.
+    if (remainingMinutes > 0 && availableDates.length) {
+      const base = Math.floor(
+        remainingMinutes / availableDates.length
+      );
+
+      const extra = remainingMinutes % availableDates.length;
+
+      availableDates.forEach((date, index) => {
+        const minutes = base + (index < extra ? 1 : 0);
+
+        if (minutes <= 0) return;
+
+        if (!schedule[date]) schedule[date] = [];
+
+        schedule[date].push({
+          id: task.id,
+          name: task.name,
+          subject: task.subject,
+          minutes,
+          dueDate: task.dueDate,
+          completed: false
+        });
       });
     }
   });
@@ -734,11 +886,12 @@ function generateSchedule() {
   return schedule;
 }
 
-// Display automatically generated daily sessions
+// Display daily assignments with individual checkboxes
 function renderSchedule() {
   const container = document.getElementById("schedule");
   const schedule = generateSchedule();
   const dates = Object.keys(schedule).sort();
+  const today = localDate();
 
   if (!dates.length) {
     container.innerHTML = `
@@ -746,8 +899,8 @@ function renderSchedule() {
         <div class="empty-icon">🎉</div>
         ${
           tasks.length
-          ? "All your tasks are complete! Enjoy your free time."
-          : "Add your first task to build your study schedule."
+            ? "All your assignments are complete! Enjoy your free time."
+            : "Add your first assignment to generate your study plan."
         }
       </div>`;
     return;
@@ -755,60 +908,112 @@ function renderSchedule() {
 
   container.innerHTML = dates.map(date => {
     const sessions = schedule[date];
+
     const totalMinutes = sessions.reduce(
-      (sum, s) => sum + s.minutes, 0
+      (sum, session) => sum + session.minutes, 0
+    );
+
+    const completedMinutes = sessions
+      .filter(session => session.completed)
+      .reduce((sum, session) => sum + session.minutes, 0);
+
+    const percentage = totalMinutes
+      ? Math.round(completedMinutes / totalMinutes * 100)
+      : 0;
+
+    const isOverdue = sessions.some(
+      session => session.dueDate < today
     );
 
     return `
       <div class="day">
+
         <div class="day-header">
-          <div class="day-date">${formatDate(date)}</div>
+          <div>
+            <div class="day-date">${formatDate(date)}</div>
+
+            <div class="day-progress-label">
+              ${sessions.filter(s => s.completed).length}
+              of ${sessions.length} sessions completed
+            </div>
+
+            ${isOverdue && date === today
+              ? '<div class="overdue">Overdue work — catch up today</div>'
+              : ''
+            }
+          </div>
+
           <div class="day-total">
-            ${formatDuration(totalMinutes)} of studying
+            ${formatDuration(completedMinutes)}
+            / ${formatDuration(totalMinutes)}
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill"
+            style="width:${percentage}%;
+              background:${percentage === 100 ? 'var(--green)' : 'var(--purple)'}">
           </div>
         </div>
 
         ${sessions.map(session => `
-          <div class="session">
+          <div class="session ${session.completed ? "completed-session" : ""}">
+
+            <div class="session-left">
+
+              <input type="checkbox"
+                aria-label="Complete ${escapeHTML(session.name)} session"
+                ${session.completed ? "checked" : ""}
+                onchange="toggleSession(
+                  '${session.id}',
+                  '${date}',
+                  ${session.minutes},
+                  this.checked
+                )">
+
+              <div style="min-width:0;">
+                <div class="session-name">
+                  ${escapeHTML(session.name)}
+                </div>
+
+                <div class="session-subject">
+                  ${escapeHTML(session.subject)}
+                  · Due ${formatDate(session.dueDate)}
+                </div>
+              </div>
+            </div>
+
             <div>
-              <div class="session-name">
-                ${escapeHTML(session.name)}
+              <div class="session-time">
+                ${formatDuration(session.minutes)}
               </div>
-              <div class="session-subject">
-                ${escapeHTML(session.subject)}
-                · Due ${formatDate(session.dueDate)}
+
+              <div class="session-status"
+                style="color:${session.completed ? 'var(--green)' : 'var(--muted)'}">
+                ${session.completed ? "Completed ✓" : "To do"}
               </div>
             </div>
-            <div class="session-time">
-              ${formatDuration(session.minutes)}
-            </div>
+
           </div>
         `).join("")}
+
       </div>
     `;
   }).join("");
 }
 
-function formatDuration(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+// Refresh button
+document.getElementById("generateBtn").addEventListener(
+  "click", renderSchedule
+);
 
-  if (hours && mins) return `${hours}h ${mins}m`;
-  if (hours) return `${hours}h`;
-  return `${mins}m`;
-}
-
+// Render everything when the app opens
 function render() {
   renderStats();
   renderTasks();
   renderSchedule();
 }
 
-document.getElementById("generateBtn").addEventListener(
-  "click", renderSchedule
-);
-
-// Initial render loads previously saved information.
 render();
 </script>
 

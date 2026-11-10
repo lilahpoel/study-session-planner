@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudySpace | Study Session Planner</title>
+
+<style>
+:root {
+  --bg: #f6f5fb;
+  --surface: #ffffff;
+  --text: #24233b;
+  --muted: #85849b;
+  --purple: #7664d8;
+  --purple-light: #eeeaff;
+  --border: #eceaf3;
+  --green: #3caa83;
+  --shadow: 0 5px 25px rgba(40,30,80,.05);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+button, input, select { font: inherit; }
+
+.app {
+  max-width: 1200px;
+  margin: auto;
+  padding: 28px 24px 60px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  background: var(--purple);
+  color: white;
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 22px;
+}
+
+.brand h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.brand p {
+  color: var(--muted);
+  margin: 3px 0 0;
+  font-size: 12px;
+}
+
+.today-label {
+  background: white;
+  padding: 11px 16px;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  border: 1px solid var(--border);
+}
+
+.welcome { margin-bottom: 25px; }
+
+.welcome h2 {
+  font-size: 29px;
+  margin: 0 0 8px;
+}
+
+.welcome p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.stat-number {
+  font-size: 29px;
+  font-weight: 750;
+  margin-top: 10px;
+}
+
+.stat small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.progress-track {
+  height: 9px;
+  border-radius: 20px;
+  background: #efedf5;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 20px;
+  transition: width .3s;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 370px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.panel h3 {
+  font-size: 17px;
+  margin: 0 0 19px;
+}
+
+.field { margin-bottom: 15px; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  margin-bottom: 7px;
+}
+
+.field input, .field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  outline: none;
+  background: #fff;
+  color: var(--text);
+}
+
+.field input:focus, .field select:focus {
+  border-color: var(--purple);
+}
+
+.primary-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 16px;
+  width: 100%;
+  background: var(--purple);
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.primary-btn:hover { background: #6351c4; }
+
+.secondary-btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--purple);
+  padding: 10px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.task {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.task:last-child { border-bottom: 0; }
+
+.task input[type=checkbox] {
+  accent-color: var(--purple);
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.task-info { flex: 1; min-width: 0; }
+
+.task-name {
+  font-size: 14px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.task.completed .task-name {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.task-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.subject-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--purple-light);
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 650;
+  margin-top: 7px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.delete-btn:hover { color: #dc6262; }
+
+.schedule-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.schedule-heading h3 { margin: 0; }
+
+.day {
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.day-date {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.day-total {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.session {
+  background: #f8f7fc;
+  border-radius: 9px;
+  padding: 11px 12px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-name {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.session-subject {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.session-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--purple);
+  white-space: nowrap;
+}
+
+.empty {
+  text-align: center;
+  padding: 30px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.empty-icon { font-size: 30px; margin-bottom: 8px; }
+
+.footer-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 25px;
+}
+
+@media(max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .app { padding: 20px 14px; }
+  .welcome h2 { font-size: 24px; }
+}
+
+@media(max-width: 430px) {
+  .stats { grid-template-columns: 1fr; }
+  .today-label { display: none; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="brand">
+    <div class="logo">✎</div>
+    <div>
+      <h1>StudySpace</h1>
+      <p>Make time for what matters.</p>
+    </div>
+  </div>
+  <div class="today-label" id="today"></div>
+</header>
+
+<section class="welcome">
+  <h2>Let's get things done! ✨</h2>
+  <p>Your personal study planner. Stay organized, meet deadlines,
+     and make progress every day.</p>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-label">Total Tasks</div>
+    <div class="stat-number" id="totalTasks">0</div>
+    <small>Tasks in your planner</small>
+  </div>
+
+  <div class="stat">
+    <div class="stat-label">Completed</div>
+    <div class="stat-number" id="completedTasks">0</div>
+    <small>Tasks you've finished</small>
+  </div>
+
+  <div class="stat">
+    <div class="stat-label">Overall Progress</div>
+    <div class="stat-number" id="progressText">0%</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar"
+           style="width:0%"></div>
+    </div>
+  </div>
+</section>
+
+<main class="layout">
+
+<!-- LEFT COLUMN -->
+<div>
+
+  <section class="panel">
+    <h3>＋ Add a New Task</h3>
+
+    <form id="taskForm">
+      <div class="field">
+        <label for="taskName">Task Name</label>
+        <input id="taskName" type="text"
+          placeholder="e.g. Study Chapter 5" required>
+      </div>
+
+      <div class="field">
+        <label for="subject">Subject</label>
+        <select id="subject" required>
+          <option value="">Select a subject</option>
+          <option>Anthropology</option>
+          <option>Marketing</option>
+          <option>Communications</option>
+          <option>Spanish</option>
+          <option>Biology</option>
+          <option>Mathematics</option>
+          <option>History</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="hours">Estimated Study Time (hours)</label>
+        <input id="hours" type="number" min="0.25"
+          max="100" step="0.25" placeholder="e.g. 2" required>
+      </div>
+
+      <div class="field">
+        <label for="dueDate">Due Date</label>
+        <input id="dueDate" type="date" required>
+      </div>
+
+      <button class="primary-btn" type="submit">
+        + Add Task to Planner
+      </button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h3>Your Tasks</h3>
+    <div id="taskList">
+      <div class="empty">
+        <div class="empty-icon">📚</div>
+        Your tasks will appear here.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- RIGHT COLUMN -->
+<div>
+
+  <section class="panel">
+    <div class="schedule-heading">
+      <h3>📅 Your Study Schedule</h3>
+      <button class="secondary-btn" id="generateBtn">
+        ↻ Regenerate
+      </button>
+    </div>
+
+    <p style="font-size:12px;color:#85849b;margin-top:-8px;
+      margin-bottom:18px;">
+      Your remaining study time is automatically divided
+      across the days leading up to each deadline.
+    </p>
+
+    <div id="schedule">
+      <div class="empty">
+        <div class="empty-icon">🗓️</div>
+        Add a task to generate your personalized study schedule.
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>💡 Study Tips</h3>
+    <div style="font-size:12px;color:#77768c;line-height:2;">
+      <div>✦ Break larger assignments into smaller sessions.</div>
+      <div>✦ Start studying before deadlines get too close.</div>
+      <div>✦ Take short breaks between study sessions.</div>
+      <div>✦ Check off tasks as soon as you finish them!</div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<div class="footer-note">
+  StudySpace • Your goals, one session at a time ♡
+  <br>Changes are automatically saved in this browser.
+</div>
+
+</div>
+
+<script>
+const STORAGE_KEY = "studyspace_tasks_v1";
+
+let tasks = loadTasks();
+
+function loadTasks() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function localDate(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function parseDate(value) {
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(y, m - 1, d, 12);
+}
+
+function addDays(value, amount) {
+  const date = parseDate(value);
+  date.setDate(date.getDate() + amount);
+  return localDate(date);
+}
+
+function formatDate(value) {
+  return parseDate(value).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric"
+  });
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+// Display today's date
+document.getElementById("today").textContent =
+  new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+
+// Set minimum deadline to today
+document.getElementById("dueDate").min = localDate();
+
+document.getElementById("taskForm").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const name = document.getElementById("taskName").value.trim();
+  const subject = document.getElementById("subject").value;
+  const hours = Number(document.getElementById("hours").value);
+  const dueDate = document.getElementById("dueDate").value;
+
+  if (!name || !subject || !hours || hours <= 0 || !dueDate) {
+    alert("Please fill out all task details.");
+    return;
+  }
+
+  if (!Number.isFinite(hours) || hours > 100) {
+    alert("Please enter a valid study time.");
+    return;
+  }
+
+  tasks.push({
+    id: crypto.randomUUID
+      ? crypto.randomUUID()
+      : String(Date.now()) + Math.random(),
+    name,
+    subject,
+    minutes: Math.round(hours * 60),
+    dueDate,
+    completed: false
+  });
+
+  saveTasks();
+  e.target.reset();
+  render();
+});
+
+// Mark tasks complete or incomplete
+function toggleTask(id) {
+  tasks = tasks.map(task =>
+    task.id === id
+      ? {...task, completed: !task.completed}
+      : task
+  );
+  saveTasks();
+  render();
+}
+
+// Delete tasks
+function deleteTask(id) {
+  if (!confirm("Are you sure you want to delete this task?")) return;
+
+  tasks = tasks.filter(task => task.id !== id);
+  saveTasks();
+  render();
+}
+
+// Render task list
+function renderTasks() {
+  const list = document.getElementById("taskList");
+
+  if (!tasks.length) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📚</div>
+        No tasks yet. Add your first task above!
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = tasks
+    .slice()
+    .sort((a,b) => a.dueDate.localeCompare(b.dueDate))
+    .map(task => `
+      <div class="task ${task.completed ? "completed" : ""}">
+        <input type="checkbox"
+          aria-label="Mark ${escapeHTML(task.name)} complete"
+          ${task.completed ? "checked" : ""}
+          onchange="toggleTask('${task.id}')">
+
+        <div class="task-info">
+          <div class="task-name">${escapeHTML(task.name)}</div>
+          <div class="task-meta">
+            ${task.minutes / 60} hours · Due ${formatDate(task.dueDate)}
+          </div>
+          <span class="subject-tag">
+            ${escapeHTML(task.subject)}
+          </span>
+        </div>
+
+        <button class="delete-btn"
+          aria-label="Delete task"
+          onclick="deleteTask('${task.id}')">×</button>
+      </div>
+    `).join("");
+}
+
+// Update dashboard progress
+function renderStats() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.completed).length;
+  const percentage = total
+    ? Math.round(completed / total * 100)
+    : 0;
+
+  document.getElementById("totalTasks").textContent = total;
+  document.getElementById("completedTasks").textContent = completed;
+  document.getElementById("progressText").textContent =
+    percentage + "%";
+  document.getElementById("progressBar").style.width =
+    percentage + "%";
+}
+
+// Automatically distribute incomplete task time across
+// all available days, including the deadline.
+function generateSchedule() {
+  const today = localDate();
+  const schedule = {};
+
+  const remainingTasks = tasks
+    .filter(t => !t.completed)
+    .slice()
+    .sort((a,b) =>
+      a.dueDate.localeCompare(b.dueDate)
+    );
+
+  remainingTasks.forEach(task => {
+    // Overdue tasks are scheduled for today.
+    const deadline = task.dueDate < today
+      ? today
+      : task.dueDate;
+
+    const start = today;
+    const end = deadline;
+
+    const dayCount = Math.max(
+      1,
+      Math.round(
+        (parseDate(end) - parseDate(start)) / 86400000
+      ) + 1
+    );
+
+    // Spread minutes as evenly as possible across days.
+    const base = Math.floor(task.minutes / dayCount);
+    const extra = task.minutes % dayCount;
+
+    for (let i = 0; i < dayCount; i++) {
+      const date = addDays(today, i);
+      const minutes = base + (i < extra ? 1 : 0);
+
+      if (!minutes) continue;
+
+      if (!schedule[date]) schedule[date] = [];
+
+      schedule[date].push({
+        name: task.name,
+        subject: task.subject,
+        minutes,
+        dueDate: task.dueDate
+      });
+    }
+  });
+
+  return schedule;
+}
+
+// Display automatically generated daily sessions
+function renderSchedule() {
+  const container = document.getElementById("schedule");
+  const schedule = generateSchedule();
+  const dates = Object.keys(schedule).sort();
+
+  if (!dates.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🎉</div>
+        ${
+          tasks.length
+          ? "All your tasks are complete! Enjoy your free time."
+          : "Add your first task to build your study schedule."
+        }
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = dates.map(date => {
+    const sessions = schedule[date];
+    const totalMinutes = sessions.reduce(
+      (sum, s) => sum + s.minutes, 0
+    );
+
+    return `
+      <div class="day">
+        <div class="day-header">
+          <div class="day-date">${formatDate(date)}</div>
+          <div class="day-total">
+            ${formatDuration(totalMinutes)} of studying
+          </div>
+        </div>
+
+        ${sessions.map(session => `
+          <div class="session">
+            <div>
+              <div class="session-name">
+                ${escapeHTML(session.name)}
+              </div>
+              <div class="session-subject">
+                ${escapeHTML(session.subject)}
+                · Due ${formatDate(session.dueDate)}
+              </div>
+            </div>
+            <div class="session-time">
+              ${formatDuration(session.minutes)}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+}
+
+function formatDuration(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours && mins) return `${hours}h ${mins}m`;
+  if (hours) return `${hours}h`;
+  return `${mins}m`;
+}
+
+function render() {
+  renderStats();
+  renderTasks();
+  renderSchedule();
+}
+
+document.getElementById("generateBtn").addEventListener(
+  "click", renderSchedule
+);
+
+// Initial render loads previously saved information.
+render();
+</script>
+
+</body>
+</html>
